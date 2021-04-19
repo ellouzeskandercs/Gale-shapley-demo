@@ -1,0 +1,106 @@
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/fontawesome.min.css" integrity="sha384-wESLQ85D6gbsF459vf1CiZ2+rr+CsxRY0RpiF1tLlQpDnAgg6rwdsUF1+Ics2bni" crossorigin="anonymous">
+<body>
+  <div class="modal fade" id="newMemberModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Add a new member</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-group row">
+              <label for="newDisplayName" class="col-sm-2 col-form-label">Display name:</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="newDisplayName">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="newGroupSelect" class="col-sm-2 col-form-label">Group:</label>
+              <div class="col-sm-10">
+                <select id="newGroupSelect" class="form-control">
+                  <option selected>Group A</option>
+                  <option>Group B</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="addMemberBtn">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="choicesModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Choices List</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div id="choicesListBody" class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="addMemberBtn">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="parent">
+    <div class="child col-sm-4" id="GroupAMembers"></div>
+    <div class="child col-sm-4" id="GroupBMembers"></div>
+    <div class="child col-sm-4" id="SettingsAndCouples">
+      <div class="child" id="settingBtns">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newMemberModal">
+          Add new Member
+        </button>
+        <button type="button" style="margin-top: 10px;" class="btn btn-primary" id="quickSetupBtn" >
+          Quick Setup
+        </button>
+        <button type="button" style="margin-top: 10px;" class="btn btn-primary" id="startAlgoBtn" >
+          Start the algorithm
+        </button>
+      </div>
+      <div id="couples" style="display: none">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>
+                Group A
+              </th>
+              <th>
+                Group B
+              </th>
+            </tr>
+          </thead>
+          <tbody class="couplesTableBody">            
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: none;" class="btn-group" role="group" aria-label="Basic example" id="bottomBtns">
+    <!-- <button type="button" class="btn btn-primary" id="ini">Initialization</button>
+    <button type="button" class="btn btn-primary" id="sel">Selection</button>
+    <button type="button" class="btn btn-primary" id="c-o">Cross-over</button>
+    <button type="button" class="btn btn-primary" id="mut">Mutation</button> -->
+    <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+  </div>
+</body>
+<script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" data-auto-replace-svg="nest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js"> </script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="index.js"></script>
