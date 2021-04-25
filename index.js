@@ -1,150 +1,40 @@
-// let population = [];
-// let bestScore = 0;
-// let step = 0;
-// let initialPop = 3;
-// let selectionOutput = 3;
-// let spaceSize = 12; 
-// let mutationProbability = 0.05;
 
-// function initialize_population() {
-//   return _.range(initialPop).map(() => _.range(spaceSize).map(() => Math.round(Math.random())))
-// }
-// function fitness(individual) {
-//   return _.reverse(_.clone(individual)).reduce((acc, el, idx) => acc +(el * (2**idx)))
-// }
-// function selection(population) {
-//   return _.slice(_.sortBy(population, (ind) => - fitness(ind)), 0, selectionOutput);
-// }
-// function crossOver(a, b) {
-//   return _.concat(_.slice(a, 0, spaceSize/2), _.slice(b, spaceSize/2, spaceSize))
-// }
-// function crossPhase(population) {
-//   return population.reduce((acc, el, idx) => _.concat(acc, population.map(element => crossOver(el, element))), [])
-// }
-// function mutation(individual) {
-//   return individual.map(genom => Math.random() < mutationProbability ? 1 - genom : genom)
-// }
-// function mutationPhase(population) {
-//   return population.map(individu => mutation(individu))
-// }
-// function transforIndToStr(individual){
-//   return individual.reduce((acc, el) => acc+el, "")
-// }
-// function displayPopulation(population, id){
-//   let element = document.getElementById(id);
-//   element.innerHTML = population.reduce((acc, el) => acc + transforIndToStr(el) + "<br/>", "")
-// }
-// function getBestScore(population){
-//   return fitness(_.maxBy(population, (ind) => fitness(ind)))
-// }
-// function displayBestScore(score, id){
-//   let element = document.getElementById(id);
-//   if(score !== undefined){
-//     element.innerHTML = "<b> Step: " + step + "</b><b> Best Score: " + score + "</b>";
-//   } else {
-//     element.innerHTML = "";
-//   }
-// }
-// function switchBtn(btn){
-//   inibtn.disabled = !(btn === selbtn && step === 0);
-//   selbtn.disabled = !(btn === selbtn);
-//   cobtn.disabled = !(btn === cobtn);
-//   mutbtn.disabled = !(btn === mutbtn);
-// }
-
-// let inibtn = document.getElementById("ini");
-// let selbtn = document.getElementById("sel");
-// let cobtn = document.getElementById("c-o");
-// let mutbtn = document.getElementById("mut");
-// let nxtbtn = document.getElementById("next");
-// let refbtn = document.getElementById("refresh");
-// let iniInp = document.getElementById("iniPopSize");
-// let selInp = document.getElementById("selPopSize");
-// let genInp = document.getElementById("nbGenoms");
-// let probInp = document.getElementById("probMut");
-
-// function init(){
-//   inibtn.disabled = false;
-//   selbtn.disabled = true;
-//   cobtn.disabled = true;
-//   mutbtn.disabled = true;
-//   iniInp.value = initialPop;
-//   selInp.value = selectionOutput;
-//   genInp.value = spaceSize;
-//   probInp.value = mutationProbability;
-// }
-
-// init();
-
-// inibtn.onclick = function(){
-//   population = initialize_population()
-//   bestScore = getBestScore(population);
-//   displayPopulation(population, "generation")
-//   displayBestScore(bestScore, "best")
-//   switchBtn(selbtn)
-// }
-// selbtn.onclick = function(){
-//   population = selection(population);
-//   displayPopulation(population, "selection")
-//   switchBtn(cobtn)
-// }
-// cobtn.onclick = function(){
-//   population = crossPhase(population);
-//   displayPopulation(population, "cross")
-//   switchBtn(mutbtn)
-// }
-// mutbtn.onclick = function(){
-//   population = mutationPhase(population);
-//   displayPopulation(population, "generation")
-//   bestScore = getBestScore(population);
-//   step = step + 1;
-//   displayPopulation(population, "generation")
-//   displayPopulation([], "selection")
-//   displayPopulation([], "cross")
-//   displayBestScore(bestScore, "best")
-//   switchBtn(selbtn)
-// }
-// nxtbtn.onclick = function(){
-//   if(!mutbtn.disabled){
-//     return mutbtn.click()
-//   }
-//   if(!cobtn.disabled){
-//     return cobtn.click()
-//   }
-//   if(!selbtn.disabled){
-//     return selbtn.click()
-//   }
-//   if(!inibtn.disabled){
-//     return inibtn.click()
-//   }
-// }
-// refbtn.onclick = function(){
-//   initialPop = iniInp.value;
-//   selectionOutput = selInp.value;
-//   spaceSize = genInp.value; 
-//   mutationProbability = probInp.value;
-//   population = [];
-//   bestScore = 0;
-//   step = 0;
-//   init();
-//   displayPopulation([], "generation")
-//   displayPopulation([], "selection")
-//   displayPopulation([], "cross")
-//   displayBestScore(undefined, "best")
-// }
 const couples = {};
-const groupA = [];
-const groupB = [];
+let groupA = [];
+let groupB = [];
 let algoPhase = false;
 let currentStep = {
   memberA: 0,
   memberB: 0,
-  finished: true
+  finished: true,
+  evaluated: true
 }
 
+
+/* group and members functions */
 function isGroupA(id){
   return id > 0;
 }
+function getMemberById(id){
+  return (isGroupA(id)? _.find(groupA, (el) => el.id === id): _.find(groupB, (el) => el.id === id));
+}
+function addMember(group, member, coeff){
+  member.id = coeff * (group.length + 1);
+  group.push(member);
+}
+
+/* order functions */
+function getOrderedChoicesForMember(a){ //a is an id
+  return(isGroupA(a) ? _.sortBy(groupB, (elt) => getOrder(a,elt.id)) : _.sortBy(groupA, (elt) => getOrder(a,elt.id)))
+}
+function getOrder(a,b){ // a and b are both ids
+  return getMemberById(a)["choices"][b];
+}
+function setOrder(a, b, order){ // a and b are both ids
+  getMemberById(a)["choices"][b] = Number(order);
+}
+
+/* couples functions */
 function createCouple(a,b){
   couples[a] = b;
   couples[b] = a;
@@ -153,33 +43,49 @@ function removeCouple(a,b){
   delete couples[a];
   delete couples[b];
 }
-function getMemberById(id){
-  return (isGroupA(id)? _.find(groupA, (el) => el.id === id): _.find(groupB, (el) => el.id === id));
+function getOneSingle(group){
+  return _.sample(_.filter(group, (elt) => !couples[elt.id]));
 }
-function getAllOrder(a){ //a is an id
-  Object.keysgetMemberById(a)
-}
-function getOrder(a,b){ // a and b are both ids
-  return getMemberById(a)["choices"][b];
-}
-function setOrder(a, b, order){ // a and b are both ids
-  console.log('order')
-  console.log(order)
-  getMemberById(a)["choices"][b] = Number(order);
-}
-function evaluateCouple(a,b){
+function evaluateCouple(a,b){ //a and b are both ids, a MUST be SINGLE.
   if (!couples[b]){
     return true;
+  } else if (couples[b]){
+    let member = couples[b];
+    return(getOrder(b,a) < getOrder(b, member))
   }
-  return (getOrder(b, couples[b]) > getOrder(b, a));
 }
-function checkAllOrdered(){
-  return (groupA.reduce((acc, el) => acc & (el["order"].length === groupB.length),true) &&
-  groupB.reduce((acc, el) => acc & (el["order"].length === groupA.length),true))
+
+/* display functions */
+function displayOneMember(member){
+  return(`
+  <li id="member_${member.id}" class="list-group-item member-card">
+    <i class="fas fa-user"> </i> 
+    <span>${member.displayName}</span> 
+    ${algoPhase? `<span id="order_member_${member.id}" class="float-right badge badge-light"></span>`: `<i onclick="openChoices(${member.id})" style="padding-top: 2px;" class="float-right fas fa-list"> </i>`}  
+  </li>`);  
 }
-function addMember(group, member, coeff){
-  member.id = coeff * (group.length + 1);
-  group.push(member);
+function displayMembers(){
+  groupAMembers.innerHTML=groupA.reduce((acc, el) => acc + displayOneMember(el), '<ul class="list-group member">') + '</ul>';
+  groupBMembers.innerHTML=groupB.reduce((acc, el) => acc + displayOneMember(el), '<ul class="list-group member">') + '</ul>';
+}
+function highLightMember(id){
+  let memberElt = document.getElementById(`member_${id}`);
+  memberElt.style.border = "solid red";
+}
+function displayOrder(member){
+  if (isGroupA(member)){
+    groupB.forEach((elt) => {
+      let memberElt = document.getElementById(`order_member_${elt.id}`);
+      memberElt.style.display = "block";
+      memberElt.innerHTML = getOrder(member, elt.id);
+    })
+  } else {
+    groupA.forEach((elt) => {
+      let memberElt = document.getElementById(`order_member_${elt.id}`);
+      memberElt.style.display = "block";
+      memberElt.innerHTML = getOrder(member, elt.id);
+    })
+  }
 }
 function displayOneChoice(member, max, selectedMemberId){
   return(`
@@ -199,13 +105,13 @@ function openChoices(id){
     $('#choicesModal').modal('show')
   }
 }
-function displayOneMember(member){
-  return(`<li class="list-group-item member-card"><i class="fas fa-user"> </i> <span>${member.displayName}</span> <i onclick="openChoices(${member.id})" style="padding-top: 2px;" class="float-right fas fa-list"> </i> </li>`);  
+function displayOneCouple(id){
+  return `<tr> <td> ${getMemberById(parseInt(id)).displayName} </td> <td> ${getMemberById(couples[id]).displayName} </td></tr>`
+};
+function displayCouples(){
+  couplesTableBody.innerHTML = _.filter(_.keys(couples), (elt) => elt > 0).reduce((acc, elt) => acc + displayOneCouple(elt), '')
 }
-function displayMembers(){
-  groupAMembers.innerHTML=groupA.reduce((acc, el) => acc + displayOneMember(el), '<ul class="list-group member">') + '</ul>';
-  groupBMembers.innerHTML=groupB.reduce((acc, el) => acc + displayOneMember(el), '<ul class="list-group member">') + '</ul>';
-}
+
 
 let addMemberBtn = document.getElementById("addMemberBtn");
 let newGroupSelect = document.getElementById("newGroupSelect");
@@ -218,6 +124,7 @@ let bottomBtns = document.getElementById("bottomBtns");
 let quickSetupBtn = document.getElementById("quickSetupBtn");
 let settingBtns = document.getElementById("settingBtns");
 let couplesDiv = document.getElementById("couples");
+let couplesTableBody = document.getElementById("couplesTableBody");
 let nextBtn = document.getElementById("nextBtn");
 
 addMemberBtn.onclick = function(){
@@ -227,7 +134,6 @@ addMemberBtn.onclick = function(){
   };
   const group = newGroupSelect.value;
   addMember(group === "Group A"? groupA: groupB, newMember, group === "Group A"? 1 : -1)
-  console.log(groupA, groupB);
   displayMembers()
 }
 
@@ -236,10 +142,65 @@ startAlgoBtn.onclick = function(){
   bottomBtns.style.display = "block";
   couplesDiv.style.display = "block";
   settingBtns.style.display = "none";
+  displayMembers();
 }
 
 nextBtn.onclick = function(){
   if (currentStep.finished){
-
+    let member = getOneSingle(groupA);
+    currentStep.memberA = member.id;
+    currentStep.finished = false;
+    highLightMember(currentStep.memberA);
+    displayOrder(currentStep.memberA);
+  } else if(currentStep.evaluated) {
+    let orderedChoices = getOrderedChoicesForMember(currentStep.memberA);
+    currentStep.memberB = orderedChoices[currentStep.memberB ? _.findIndex(orderedChoices, (elt) => elt.id === currentStep.memberB) + 1 : 0].id;
+    currentStep.evaluated = false;
+    highLightMember(currentStep.memberB);
+    if (couples[currentStep.memberB]){
+      displayOrder(currentStep.memberB);
+    }
+  } else {
+    const shouldMarry = evaluateCouple(currentStep.memberA, currentStep.memberB);
+    if (shouldMarry) {
+      if (couples[currentStep.memberB]) {
+        removeCouple(currentStep.memberB, couples[currentStep.memberB]);
+      }
+      createCouple(currentStep.memberB, currentStep.memberA);
+      currentStep = {
+        memberA: 0,
+        memberB: 0,
+        finished: true,
+        evaluated: true
+      }
+      displayCouples();
+        displayMembers();
+    } else {
+      displayMembers();
+      highLightMember(currentStep.memberA);
+      displayOrder(currentStep.memberA);
+      currentStep.evaluated = true;
+    }
   }
+  if(!getOneSingle(groupA)){
+    nextBtn.disabled = true;
+  }
+}
+
+quickSetupBtn.onclick = function(){
+  groupA = [
+    {id: 1, displayName: 'A1', choices: {'-1' : 2, '-2' : 1, '-3' : 3, '-4': 5, '-5': 4}},
+    {id: 2, displayName: 'A2', choices: {'-1' : 1, '-2' : 3, '-3' : 2, '-4': 5, '-5': 4}},
+    {id: 3, displayName: 'A3', choices: {'-1' : 2, '-2' : 4, '-3' : 1, '-4': 5, '-5': 3}},
+    {id: 4, displayName: 'A4', choices: {'-1' : 5, '-2' : 2, '-3' : 1, '-4': 4, '-5': 3}},
+    {id: 5, displayName: 'A5', choices: {'-1' : 1, '-2' : 2, '-3' : 3, '-4': 4, '-5': 5}},    
+  ];
+  groupB = [
+    {id: -1, displayName: 'B1', choices: {'1' : 2, '2' : 5, '3' : 1, '4': 4, '5': 3}},
+    {id: -2, displayName: 'B2', choices: {'1' : 2, '2' : 1, '3' : 5, '4': 4, '5': 3}},
+    {id: -3, displayName: 'B3', choices: {'1' : 5, '2' : 2, '3' : 3, '4': 4, '5': 1}},
+    {id: -4, displayName: 'B4', choices: {'1' : 2, '2' : 1, '3' : 5, '4': 4, '5': 3}},
+    {id: -5, displayName: 'B5', choices: {'1' : 5, '2' : 2, '3' : 1, '4': 4, '5': 3}},    
+  ];
+  displayMembers()
 }
