@@ -112,6 +112,17 @@ function displayCouples(){
   couplesTableBody.innerHTML = _.filter(_.keys(couples), (elt) => elt > 0).reduce((acc, elt) => acc + displayOneCouple(elt), '')
 }
 
+/* function needed upload/download setup */
+function copyOneMember(member){
+  let result = {}
+  result.name = member.displayName;
+  result.choices = {}
+  _.keys(member.choices).forEach((key) => {
+    result.choices[getMemberById(Number(key)).displayName] = member.choices[key]}
+  )
+  return result;
+}
+
 
 let addMemberBtn = document.getElementById("addMemberBtn");
 let newGroupSelect = document.getElementById("newGroupSelect");
@@ -126,6 +137,10 @@ let settingBtns = document.getElementById("settingBtns");
 let couplesDiv = document.getElementById("couples");
 let couplesTableBody = document.getElementById("couplesTableBody");
 let nextBtn = document.getElementById("nextBtn");
+let confirmUploadSetupBtn = document.getElementById("confirmUploadSetupBtn");
+let setupContent = document.getElementById("setupContent");
+let downloadSetupBtn = document.getElementById("downloadSetupBtn");
+
 
 addMemberBtn.onclick = function(){
   const newMember = {
@@ -204,3 +219,37 @@ quickSetupBtn.onclick = function(){
   ];
   displayMembers()
 }
+
+downloadSetupBtn.onclick = function(){
+  setup = {};
+  setup.groupA = groupA.map((el) => copyOneMember(el));
+  setup.groupB = groupB.map((el) => copyOneMember(el));
+  navigator.clipboard.writeText(JSON.stringify(setup));
+}
+
+confirmUploadSetupBtn.onclick = function(){
+  let setup = JSON.parse(setupContent.value);
+  groupA = setup.groupA.map((el, idx) => {
+    let member = {}
+    member.displayName = el.name;
+    member.id = idx + 1;
+    member.choices = {}
+    _.keys(el.choices).forEach((key) => {
+      member.choices[ -(_.findIndex(setup.groupB, (elt) => elt.name === key)+1)] = el.choices[key]}
+    )
+    return member})
+  groupB = setup.groupB.map((el, idx) => {
+    let member = {}
+    member.displayName = el.name;
+    member.id = -(idx + 1);
+    member.choices = {}
+    _.keys(el.choices).forEach((key) => {
+      member.choices[_.findIndex(setup.groupA, (elt) => elt.name === key) + 1] = el.choices[key]}
+    )
+    return member})
+  console.log(groupA, groupB)
+  displayMembers()
+}
+
+const secret1 = {"groupA":[{"name":"A1","choices":{"B2":1,"B3":3,"B1":2}},{"name":"A2","choices":{"B3":1,"B1":3,"B2":2}},{"name":"A3","choices":{"B1":1,"B2":3,"B3":2}}],"groupB":[{"name":"B1","choices":{"A1":2,"A2":1,"A3":3}},{"name":"B2","choices":{"A1":3,"A2":2,"A3":1}},{"name":"B3","choices":{"A1":1,"A2":3,"A3":2}}]}
+const secret2 = {"groupB":[{"name":"A1","choices":{"B2":1,"B3":3,"B1":2}},{"name":"A2","choices":{"B3":1,"B1":3,"B2":2}},{"name":"A3","choices":{"B1":1,"B2":3,"B3":2}}],"groupA":[{"name":"B1","choices":{"A1":2,"A2":1,"A3":3}},{"name":"B2","choices":{"A1":3,"A2":2,"A3":1}},{"name":"B3","choices":{"A1":1,"A2":3,"A3":2}}]}
